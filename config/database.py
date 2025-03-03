@@ -1,16 +1,36 @@
+import os
 import sqlite3
+import sys
 from sqlite3 import Error
 
 DEFAULT_ADMIN_USERNAME = "admin"
 DEFAULT_ADMIN_PASSWORD = "admin123"
 
 
+def get_db_path():
+    """Get absolute path to database file"""
+    if getattr(sys, 'frozen', False):
+        # Running in PyInstaller bundle
+        application_path = sys._MEIPASS
+    else:
+        # Running in normal Python environment
+        application_path = os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)))
+
+    config_dir = os.path.join(application_path, 'config')
+    if not os.path.exists(config_dir):
+        os.makedirs(config_dir)
+
+    return os.path.join(config_dir, 'database.db')
+
+
 def create_connection():
     try:
-        conn = sqlite3.connect('config/database.db')
+        db_path = get_db_path()
+        conn = sqlite3.connect(db_path)
         return conn
     except Error as e:
-        print(e)
+        print(f"Error connecting to database: {e}")
         return None
 
 
