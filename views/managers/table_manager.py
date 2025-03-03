@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import (QComboBox, QHBoxLayout, QHeaderView, QLabel,
                              QMessageBox, QPushButton, QSpinBox, QTableWidget,
                              QTableWidgetItem, QVBoxLayout, QWidget)
 
-from database import create_connection
+from config.database import create_connection
 
 
 class TableManager(QWidget):

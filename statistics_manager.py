@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (QCalendarWidget, QComboBox, QHBoxLayout,
                              QHeaderView, QLabel, QTableWidget,
                              QTableWidgetItem, QVBoxLayout, QWidget)
 
-from database import create_connection
+from config.database import create_connection
 
 
 class StatisticsManager(QWidget):

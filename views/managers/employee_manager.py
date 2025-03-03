@@ -1,10 +1,11 @@
 import hashlib
+import re
 
 from PyQt6.QtWidgets import (QComboBox, QHBoxLayout, QHeaderView, QLineEdit,
                              QMessageBox, QPushButton, QSpinBox, QTableWidget,
                              QTableWidgetItem, QVBoxLayout, QWidget)
 
-from database import create_connection
+from config.database import create_connection
 
 
 class EmployeeManager(QWidget):
@@ -38,12 +39,15 @@ class EmployeeManager(QWidget):
 
         # Email
         self.email_input = QLineEdit()
-        self.email_input.setPlaceholderText("Email")
+        self.email_input.setPlaceholderText("Email (example@gmail.com)")
+        self.email_input.textChanged.connect(self.validate_email)
         form_layout.addWidget(self.email_input)
 
         # Số điện thoại
         self.phone_input = QLineEdit()
-        self.phone_input.setPlaceholderText("Số điện thoại")
+        self.phone_input.setPlaceholderText("Số điện thoại (10 số)")
+        self.phone_input.setMaxLength(10)  # Giới hạn 10 ký tự
+        self.phone_input.textChanged.connect(self.validate_phone)
         form_layout.addWidget(self.phone_input)
 
         # Chức vụ
@@ -104,6 +108,27 @@ class EmployeeManager(QWidget):
 
             conn.close()
 
+    def validate_email(self, email):
+        """Kiểm tra định dạng email"""
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if email and not re.match(email_pattern, email):
+            self.email_input.setStyleSheet("background-color: #ffebee;")
+        else:
+            self.email_input.setStyleSheet("")
+
+    def validate_phone(self, phone):
+        """Kiểm tra định dạng số điện thoại"""
+        # Chỉ cho phép nhập số
+        if phone and not phone.isdigit():
+            # Xóa các ký tự không phải số
+            self.phone_input.setText(''.join(filter(str.isdigit, phone)))
+
+        # Kiểm tra độ dài
+        if len(phone) != 10:
+            self.phone_input.setStyleSheet("background-color: #ffebee;")
+        else:
+            self.phone_input.setStyleSheet("")
+
     def add_employee(self):
         username = self.username_input.text()
         password = self.password_input.text()
@@ -113,9 +138,23 @@ class EmployeeManager(QWidget):
         position = self.position_input.currentText()
         salary = self.salary_input.value()
 
+        # Kiểm tra thông tin bắt buộc
         if not all([username, password, name, email]):
             QMessageBox.warning(
                 self, "Lỗi", "Vui lòng nhập đầy đủ thông tin bắt buộc!")
+            return
+
+        # Kiểm tra định dạng email
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, email):
+            QMessageBox.warning(
+                self, "Lỗi", "Email không đúng định dạng!\nVí dụ: example@gmail.com")
+            return
+
+        # Kiểm tra số điện thoại
+        if phone and (not phone.isdigit() or len(phone) != 10):
+            QMessageBox.warning(
+                self, "Lỗi", "Số điện thoại phải có 10 chữ số!")
             return
 
         conn = create_connection()

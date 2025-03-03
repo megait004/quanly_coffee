@@ -1,10 +1,11 @@
 from datetime import datetime
 
+from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import (QComboBox, QHBoxLayout, QHeaderView, QLabel,
                              QMessageBox, QPushButton, QSpinBox, QTableWidget,
                              QTableWidgetItem, QVBoxLayout, QWidget)
 
-from database import create_connection
+from config.database import create_connection
 
 
 class OrderManager(QWidget):
@@ -13,6 +14,11 @@ class OrderManager(QWidget):
         self.user_id = user_id
         self.init_ui()
         self.current_order_items = []
+
+        # Tạo timer để cập nhật thời gian
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.load_orders)
+        self.timer.start(30000)  # Cập nhật mỗi 30 giây
 
     def init_ui(self):
         layout = QVBoxLayout()
@@ -73,9 +79,10 @@ class OrderManager(QWidget):
 
         # Bảng lịch sử đơn hàng
         self.order_history_table = QTableWidget()
-        self.order_history_table.setColumnCount(5)
+        # Thêm cột cho nút cập nhật trạng thái
+        self.order_history_table.setColumnCount(6)
         self.order_history_table.setHorizontalHeaderLabels(
-            ["ID", "Bàn", "Thời gian", "Tổng tiền", "Trạng thái"])
+            ["ID", "Bàn", "Thời gian", "Tổng tiền", "Trạng thái", "Thao tác"])
         self.order_history_table.horizontalHeader().setSectionResizeMode(
             QHeaderView.ResizeMode.Stretch)
         layout.addWidget(self.order_history_table)
@@ -181,9 +188,9 @@ class OrderManager(QWidget):
                 total_amount = sum(item["quantity"] * item["price"]
                                    for item in self.current_order_items)
                 cursor.execute("""
-                    INSERT INTO orders (user_id, table_id, total_amount, status)
-                    VALUES (?, ?, ?, ?)
-                """, (self.user_id, table_id, total_amount, "pending"))
+                    INSERT INTO orders (user_id, table_id, total_amount, status, created_at)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (self.user_id, table_id, total_amount, "pending", datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 
                 order_id = cursor.lastrowid
 
@@ -212,6 +219,43 @@ class OrderManager(QWidget):
             except Exception as e:
                 print(e)
                 QMessageBox.warning(self, "Lỗi", "Không thể tạo đơn hàng!")
+            finally:
+                conn.close()
+
+    def update_order_status(self, order_id, new_status):
+        conn = create_connection()
+        if conn is not None:
+            try:
+                cursor = conn.cursor()
+
+                # Lấy table_id của đơn hàng
+                cursor.execute(
+                    "SELECT table_id FROM orders WHERE id = ?", (order_id,))
+                table_id = cursor.fetchone()[0]
+
+                # Cập nhật trạng thái đơn hàng
+                cursor.execute("""
+                    UPDATE orders
+                    SET status = ?
+                    WHERE id = ?
+                """, (new_status, order_id))
+
+                # Nếu đơn hàng hoàn thành hoặc hủy, cập nhật trạng thái bàn thành trống
+                if new_status in ['completed', 'cancelled']:
+                    cursor.execute("""
+                        UPDATE tables
+                        SET status = 'available'
+                        WHERE id = ?
+                    """, (table_id,))
+
+                conn.commit()
+                self.load_orders()  # Reload danh sách đơn hàng
+                QMessageBox.information(
+                    self, "Thành công", "Đã cập nhật trạng thái đơn hàng!")
+            except Exception as e:
+                print(e)
+                QMessageBox.warning(
+                    self, "Lỗi", "Không thể cập nhật trạng thái đơn hàng!")
             finally:
                 conn.close()
 
@@ -253,5 +297,27 @@ class OrderManager(QWidget):
                 }
                 self.order_history_table.setItem(
                     i, 4, QTableWidgetItem(status_map.get(order[4], order[4])))
+
+                # Thêm nút cập nhật trạng thái
+                action_widget = QWidget()
+                action_layout = QHBoxLayout(action_widget)
+                action_layout.setContentsMargins(0, 0, 0, 0)
+
+                status_combo = QComboBox()
+                status_combo.addItems(
+                    ["Chờ xử lý", "Đang chuẩn bị", "Đã phục vụ", "Hoàn thành", "Đã hủy"])
+                current_status = status_map.get(order[4], order[4])
+                status_combo.setCurrentText(current_status)
+
+                # Tạo mapping ngược để chuyển từ tiếng Việt sang giá trị trong database
+                reverse_status_map = {v: k for k, v in status_map.items()}
+
+                # Kết nối signal với lambda function để cập nhật trạng thái
+                status_combo.currentTextChanged.connect(
+                    lambda text, order_id=order[0]: self.update_order_status(
+                        order_id, reverse_status_map[text]))
+
+                action_layout.addWidget(status_combo)
+                self.order_history_table.setCellWidget(i, 5, action_widget)
 
             conn.close()

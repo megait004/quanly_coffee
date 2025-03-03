@@ -1,0 +1,14 @@
+category_id,name,description,price,available
+1,Cà phê đen,Cà phê đen truyền thống,25000,1
+1,Cà phê sữa,Cà phê sữa đá,30000,1
+1,Cappuccino,Cà phê Ý với bọt sữa,45000,1
+1,Latte,Cà phê Ý với sữa nóng,45000,1
+2,Trà sen,Trà sen thơm mát,35000,1
+2,Trà đào,Trà đào cam sả,40000,1
+2,Trà sữa trân châu,Trà sữa với trân châu đen,45000,1
+3,Sinh tố xoài,Sinh tố xoài tươi,40000,1
+3,Sinh tố bơ,Sinh tố bơ đặc biệt,45000,1
+4,Bánh flan,Bánh flan caramel,25000,1
+4,Tiramisu,Bánh tiramisu Ý,35000,1
+5,Mì Ý,Mì Ý sốt bò bằm,65000,1
+5,Sandwich,Sandwich gà nướng,45000,1

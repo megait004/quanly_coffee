@@ -7,7 +7,7 @@ DEFAULT_ADMIN_PASSWORD = "admin123"
 
 def create_connection():
     try:
-        conn = sqlite3.connect('database.db')
+        conn = sqlite3.connect('config/database.db')
         return conn
     except Error as e:
         print(e)
@@ -120,10 +120,25 @@ def create_tables(conn):
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS inventory (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                quantity INTEGER NOT NULL,
+                name TEXT NOT NULL UNIQUE,
+                quantity INTEGER DEFAULT 0,
                 unit TEXT NOT NULL,
-                threshold INTEGER NOT NULL
+                threshold INTEGER DEFAULT 0
+            )
+        ''')
+
+        # Bảng Inventory History
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS inventory_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                inventory_id INTEGER NOT NULL,
+                type TEXT NOT NULL,  -- 'import' hoặc 'export'
+                quantity INTEGER NOT NULL,
+                price REAL,
+                supplier TEXT,
+                note TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (inventory_id) REFERENCES inventory (id)
             )
         ''')
 

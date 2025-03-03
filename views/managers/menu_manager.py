@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import (QCheckBox, QComboBox, QDoubleSpinBox, QHBoxLayout,
                              QPushButton, QTableWidget, QTableWidgetItem,
                              QVBoxLayout, QWidget)
 
-from database import create_connection
+from config.database import create_connection
 
 
 class MenuManager(QWidget):

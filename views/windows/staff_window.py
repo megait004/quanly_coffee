@@ -2,8 +2,8 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (QHBoxLayout, QLabel, QMainWindow, QMessageBox,
                              QPushButton, QStackedWidget, QVBoxLayout, QWidget)
 
-from order_manager import OrderManager
-from table_manager import TableManager
+from views.managers.order_manager import OrderManager
+from views.managers.table_manager import TableManager
 
 
 class StaffWindow(QMainWindow):

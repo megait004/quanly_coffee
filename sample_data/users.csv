@@ -1,0 +1,6 @@
+username,password,role,email,phone,name,position,salary
+staff1,staff123,staff,staff1@coffee.com,0901234567,Nguyễn Văn A,Nhân viên,8000000
+staff2,staff123,staff,staff2@coffee.com,0901234568,Trần Thị B,Thu ngân,8500000
+staff3,staff123,staff,staff3@coffee.com,0901234569,Lê Văn C,Pha chế,9000000
+customer1,cust123,customer,customer1@gmail.com,0909876543,Phạm Văn D,,
+customer2,cust123,customer,customer2@gmail.com,0909876544,Hoàng Thị E,,

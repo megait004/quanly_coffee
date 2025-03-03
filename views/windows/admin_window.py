@@ -2,10 +2,13 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (QHBoxLayout, QLabel, QMainWindow, QMessageBox,
                              QPushButton, QStackedWidget, QVBoxLayout, QWidget)
 
-from order_manager import OrderManager
+from views.managers.employee_manager import EmployeeManager
+from views.managers.inventory_manager import InventoryManager
+from views.managers.menu_manager import MenuManager
+from views.managers.report_manager import ReportManager
 
 
-class CustomerWindow(QMainWindow):
+class AdminWindow(QMainWindow):
     logout_signal = pyqtSignal()
 
     def __init__(self, user_id, username):
@@ -15,8 +18,8 @@ class CustomerWindow(QMainWindow):
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle("Quản lý Quán Cà Phê - Khách hàng")
-        self.setMinimumSize(1000, 700)
+        self.setWindowTitle("Quản lý Quán Cà Phê - Admin Panel")
+        self.setMinimumSize(1200, 800)
 
         # Widget chính
         main_widget = QWidget()
@@ -26,11 +29,11 @@ class CustomerWindow(QMainWindow):
 
         # Header
         header_layout = QHBoxLayout()
-        title = QLabel("KHÁCH HÀNG")
+        title = QLabel("ADMIN PANEL")
         title.setStyleSheet("font-size: 24px; font-weight: bold;")
         header_layout.addWidget(title)
 
-        user_info = QLabel(f"Xin chào: {self.username}")
+        user_info = QLabel(f"Admin: {self.username}")
         user_info.setAlignment(Qt.AlignmentFlag.AlignRight)
         header_layout.addWidget(user_info)
 
@@ -39,7 +42,7 @@ class CustomerWindow(QMainWindow):
         # Content area
         content_layout = QHBoxLayout()
 
-        # Menu buttons
+        # Sidebar menu
         menu_layout = QVBoxLayout()
         self.create_menu_buttons(menu_layout)
         content_layout.addLayout(menu_layout, 1)
@@ -51,13 +54,26 @@ class CustomerWindow(QMainWindow):
         layout.addLayout(content_layout)
 
         # Thêm các trang quản lý
-        self.order_manager = OrderManager(self.user_id)
+        self.employee_manager = EmployeeManager()
+        self.menu_manager = MenuManager()
+        self.inventory_manager = InventoryManager()
+        self.report_manager = ReportManager()
 
-        self.stacked_widget.addWidget(self.order_manager)
+        self.stacked_widget.addWidget(self.employee_manager)
+        self.stacked_widget.addWidget(self.menu_manager)
+        self.stacked_widget.addWidget(self.inventory_manager)
+        self.stacked_widget.addWidget(self.report_manager)
 
     def create_menu_buttons(self, layout):
         buttons = [
-            ("Đặt món", lambda: self.stacked_widget.setCurrentWidget(self.order_manager))
+            ("Quản lý Nhân viên", lambda: self.stacked_widget.setCurrentWidget(
+                self.employee_manager)),
+            ("Quản lý Menu", lambda: self.stacked_widget.setCurrentWidget(
+                self.menu_manager)),
+            ("Quản lý Kho", lambda: self.stacked_widget.setCurrentWidget(
+                self.inventory_manager)),
+            ("Báo cáo & Thống kê", lambda: self.stacked_widget.setCurrentWidget(
+                self.report_manager))
         ]
 
         for text, slot in buttons:
@@ -65,7 +81,7 @@ class CustomerWindow(QMainWindow):
             button.setMinimumHeight(50)
             button.setStyleSheet("""
                 QPushButton {
-                    background-color: #2980b9;
+                    background-color: #2c3e50;
                     color: white;
                     border: none;
                     border-radius: 5px;
@@ -75,7 +91,7 @@ class CustomerWindow(QMainWindow):
                     padding-left: 20px;
                 }
                 QPushButton:hover {
-                    background-color: #3498db;
+                    background-color: #34495e;
                 }
             """)
             button.clicked.connect(slot)

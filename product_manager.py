@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import (QHBoxLayout, QHeaderView, QLineEdit, QMessageBox,
                              QPushButton, QTableWidget, QTableWidgetItem,
                              QVBoxLayout, QWidget)
 
-from database import create_connection
+from config.database import create_connection
 
 
 class ProductManager(QWidget):
