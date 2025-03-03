@@ -8,7 +8,7 @@
 
 1. Clone repository:
 ```bash
-git clone https://github.com/yourusername/quanly_coffee.git
+git clone https://github.com/megait004/quanly_coffee.git
 cd quanly_coffee
 ```
 
