@@ -1,6 +1,6 @@
 import os
 import sqlite3
-import sys
+from pathlib import Path
 from sqlite3 import Error
 
 DEFAULT_ADMIN_USERNAME = "admin"
@@ -8,29 +8,34 @@ DEFAULT_ADMIN_PASSWORD = "admin123"
 
 
 def get_db_path():
-    """Get absolute path to database file"""
-    if getattr(sys, 'frozen', False):
-        # Running in PyInstaller bundle
-        application_path = sys._MEIPASS
-    else:
-        # Running in normal Python environment
-        application_path = os.path.dirname(
-            os.path.dirname(os.path.abspath(__file__)))
+    """Lấy đường dẫn tới file database"""
+    # Lấy đường dẫn thư mục home của user
+    home_dir = str(Path.home())
 
-    config_dir = os.path.join(application_path, 'config')
-    if not os.path.exists(config_dir):
-        os.makedirs(config_dir)
+    # Tạo thư mục .coffee_shop trong thư mục home nếu chưa tồn tại
+    app_dir = os.path.join(home_dir, '.coffee_shop')
+    if not os.path.exists(app_dir):
+        os.makedirs(app_dir)
 
-    return os.path.join(config_dir, 'database.db')
+    # Đường dẫn tới file database
+    db_path = os.path.join(app_dir, 'coffee_shop.db')
+    return db_path
 
 
 def create_connection():
+    """Tạo kết nối tới database"""
+    conn = None
     try:
         db_path = get_db_path()
         conn = sqlite3.connect(db_path)
+
+        # Tạo các bảng nếu chưa tồn tại
+        create_tables(conn)
         return conn
-    except Error as e:
-        print(f"Error connecting to database: {e}")
+    except sqlite3.Error as e:
+        print(e)
+        if conn:
+            conn.close()
         return None
 
 

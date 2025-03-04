@@ -1,24 +1,32 @@
 from datetime import datetime
 
 from PyQt6.QtCore import QTimer
+from PyQt6.QtGui import QBrush, QColor, QIcon
 from PyQt6.QtWidgets import (QComboBox, QHBoxLayout, QHeaderView, QLabel,
-                             QMessageBox, QPushButton, QSpinBox, QTableWidget,
-                             QTableWidgetItem, QVBoxLayout, QWidget)
+                             QMessageBox, QPushButton, QSpinBox,
+                             QSystemTrayIcon, QTableWidget, QTableWidgetItem,
+                             QVBoxLayout, QWidget)
 
 from config.database import create_connection
 
 
 class OrderManager(QWidget):
-    def __init__(self, user_id):
+    def __init__(self, user_id, is_staff=True):
         super().__init__()
         self.user_id = user_id
+        self.is_staff = is_staff
+        self.last_order_id = 0  # Lưu ID đơn hàng cuối cùng đã kiểm tra
         self.init_ui()
         self.current_order_items = []
 
-        # Tạo timer để cập nhật thời gian
+        # Tạo timer để cập nhật thời gian và kiểm tra đơn hàng mới
         self.timer = QTimer()
-        self.timer.timeout.connect(self.load_orders)
-        self.timer.start(30000)  # Cập nhật mỗi 30 giây
+        self.timer.timeout.connect(self.check_new_orders)
+        self.timer.start(5000)  # Kiểm tra mỗi 5 giây
+
+        # Khởi tạo system tray icon cho thông báo
+        self.tray_icon = QSystemTrayIcon(self)
+        self.tray_icon.setIcon(QIcon("assets/icon.png"))
 
     def init_ui(self):
         layout = QVBoxLayout()
@@ -263,13 +271,37 @@ class OrderManager(QWidget):
         conn = create_connection()
         if conn is not None:
             cursor = conn.cursor()
-            cursor.execute("""
-                SELECT o.id, t.number, o.created_at, o.total_amount, o.status
-                FROM orders o
-                LEFT JOIN tables t ON o.table_id = t.id
-                WHERE o.user_id = ?
-                ORDER BY o.created_at DESC
-            """, (self.user_id,))
+
+            # Nếu là nhân viên, hiển thị tất cả đơn hàng
+            # Nếu là khách hàng, chỉ hiển thị đơn hàng của họ
+            if self.is_staff:
+                cursor.execute("""
+                    SELECT o.id, t.number, o.created_at, o.total_amount, o.status,
+                           u.username as customer_name
+                    FROM orders o
+                    LEFT JOIN tables t ON o.table_id = t.id
+                    LEFT JOIN users u ON o.user_id = u.id
+                    ORDER BY
+                        CASE o.status
+                            WHEN 'pending' THEN 1
+                            WHEN 'preparing' THEN 2
+                            WHEN 'served' THEN 3
+                            WHEN 'completed' THEN 4
+                            WHEN 'cancelled' THEN 5
+                        END,
+                        o.created_at DESC
+                """)
+            else:
+                cursor.execute("""
+                    SELECT o.id, t.number, o.created_at, o.total_amount, o.status,
+                           u.username as customer_name
+                    FROM orders o
+                    LEFT JOIN tables t ON o.table_id = t.id
+                    LEFT JOIN users u ON o.user_id = u.id
+                    WHERE o.user_id = ?
+                    ORDER BY o.created_at DESC
+                """, (self.user_id,))
+
             orders = cursor.fetchall()
 
             self.order_history_table.setRowCount(len(orders))
@@ -277,9 +309,12 @@ class OrderManager(QWidget):
                 # ID
                 self.order_history_table.setItem(
                     i, 0, QTableWidgetItem(str(order[0])))
-                # Bàn
+                # Bàn và tên khách hàng (chỉ cho nhân viên)
+                table_text = f"Bàn {order[1]}"
+                if self.is_staff:
+                    table_text += f" - {order[5]}"  # Thêm tên khách hàng
                 self.order_history_table.setItem(
-                    i, 1, QTableWidgetItem(f"Bàn {order[1]}"))
+                    i, 1, QTableWidgetItem(table_text))
                 # Thời gian
                 time = datetime.strptime(
                     order[2], "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y %H:%M")
@@ -295,29 +330,78 @@ class OrderManager(QWidget):
                     "completed": "Hoàn thành",
                     "cancelled": "Đã hủy"
                 }
-                self.order_history_table.setItem(
-                    i, 4, QTableWidgetItem(status_map.get(order[4], order[4])))
+                status_item = QTableWidgetItem(
+                    status_map.get(order[4], order[4]))
 
-                # Thêm nút cập nhật trạng thái
-                action_widget = QWidget()
-                action_layout = QHBoxLayout(action_widget)
-                action_layout.setContentsMargins(0, 0, 0, 0)
+                # Đánh dấu màu cho trạng thái
+                if order[4] == "pending":
+                    status_item.setBackground(
+                        QBrush(QColor("#FFF3CD")))  # Màu vàng nhạt
+                elif order[4] == "preparing":
+                    status_item.setBackground(
+                        QBrush(QColor("#CCE5FF")))  # Màu xanh nhạt
+                elif order[4] == "served":
+                    status_item.setBackground(
+                        QBrush(QColor("#D4EDDA")))  # Màu xanh lá nhạt
+                elif order[4] == "completed":
+                    status_item.setBackground(
+                        QBrush(QColor("#E2E3E5")))  # Màu xám nhạt
+                elif order[4] == "cancelled":
+                    status_item.setBackground(
+                        QBrush(QColor("#F8D7DA")))  # Màu đỏ nhạt
 
-                status_combo = QComboBox()
-                status_combo.addItems(
-                    ["Chờ xử lý", "Đang chuẩn bị", "Đã phục vụ", "Hoàn thành", "Đã hủy"])
-                current_status = status_map.get(order[4], order[4])
-                status_combo.setCurrentText(current_status)
+                self.order_history_table.setItem(i, 4, status_item)
 
-                # Tạo mapping ngược để chuyển từ tiếng Việt sang giá trị trong database
-                reverse_status_map = {v: k for k, v in status_map.items()}
+                if self.is_staff:
+                    # Thêm nút cập nhật trạng thái
+                    action_widget = QWidget()
+                    action_layout = QHBoxLayout(action_widget)
+                    action_layout.setContentsMargins(0, 0, 0, 0)
 
-                # Kết nối signal với lambda function để cập nhật trạng thái
-                status_combo.currentTextChanged.connect(
-                    lambda text, order_id=order[0]: self.update_order_status(
-                        order_id, reverse_status_map[text]))
+                    status_combo = QComboBox()
+                    status_combo.addItems(
+                        ["Chờ xử lý", "Đang chuẩn bị", "Đã phục vụ", "Hoàn thành", "Đã hủy"])
+                    current_status = status_map.get(order[4], order[4])
+                    status_combo.setCurrentText(current_status)
 
-                action_layout.addWidget(status_combo)
-                self.order_history_table.setCellWidget(i, 5, action_widget)
+                    # Tạo mapping ngược để chuyển từ tiếng Việt sang giá trị trong database
+                    reverse_status_map = {v: k for k, v in status_map.items()}
+
+                    # Kết nối signal với lambda function để cập nhật trạng thái
+                    status_combo.currentTextChanged.connect(
+                        lambda text, order_id=order[0]: self.update_order_status(
+                            order_id, reverse_status_map[text]))
+
+                    action_layout.addWidget(status_combo)
+                    self.order_history_table.setCellWidget(i, 5, action_widget)
+
+            conn.close()
+
+    def check_new_orders(self):
+        """Kiểm tra đơn hàng mới và hiển thị thông báo"""
+        conn = create_connection()
+        if conn is not None:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT o.id, t.number, o.created_at
+                FROM orders o
+                LEFT JOIN tables t ON o.table_id = t.id
+                WHERE o.id > ? AND o.status = 'pending'
+                ORDER BY o.id DESC
+                LIMIT 1
+            """, (self.last_order_id,))
+
+            new_order = cursor.fetchone()
+            if new_order:
+                order_id, table_number, created_at = new_order
+                self.last_order_id = order_id
+
+                # Hiển thị thông báo
+                message = f"Đơn hàng mới từ Bàn {table_number}\nThời gian: {created_at}"
+                self.tray_icon.showMessage(
+                    "Đơn hàng mới", message, QSystemTrayIcon.MessageIcon.Information)
+
+                # Cập nhật bảng đơn hàng
+                self.load_orders()
 
             conn.close()

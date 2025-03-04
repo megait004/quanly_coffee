@@ -17,6 +17,7 @@ class RegisterDialog(QDialog):
         # Thiết lập cửa sổ
         self.setWindowTitle("Đăng ký")
         self.setMinimumWidth(450)
+        self.setFixedHeight(700)  # Tăng chiều cao một chút
 
         # Thiết lập window flags
         self.setWindowFlags(Qt.WindowType.Window)
@@ -32,19 +33,28 @@ class RegisterDialog(QDialog):
                 font-size: 14px;
             }}
             QLineEdit {{
-                padding: 8px;
+                padding: 6px 12px;
                 border-radius: 5px;
                 border: 1px solid {COLORS['border']};
                 background: white;
+                font-size: 14px;
+                height: 32px;
+                margin: 1px;
+            }}
+            QLineEdit::placeholder {{
+                color: #999;
+                font-size: 14px;
             }}
             QLineEdit:focus {{
                 border: 2px solid {COLORS['primary']};
+                margin: 0px;
             }}
             QPushButton {{
                 padding: 10px;
                 border-radius: 5px;
                 font-weight: bold;
                 color: white;
+                margin-top: 10px;
             }}
             QPushButton#registerButton {{
                 background-color: {COLORS['primary']};
@@ -53,13 +63,17 @@ class RegisterDialog(QDialog):
                 background-color: {COLORS['primary_dark']};
             }}
             QComboBox {{
-                padding: 8px;
+                padding: 6px 12px;
                 border-radius: 5px;
                 border: 1px solid {COLORS['border']};
                 background: white;
+                font-size: 14px;
+                height: 32px;
+                margin: 1px;
             }}
             QComboBox:focus {{
                 border: 2px solid {COLORS['primary']};
+                margin: 0px;
             }}
         """)
 
@@ -73,16 +87,16 @@ class RegisterDialog(QDialog):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        layout.setSpacing(20)
-        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(10)
+        layout.setContentsMargins(30, 15, 30, 15)
 
         # Tiêu đề
         title = QLabel("ĐĂNG KÝ TÀI KHOẢN")
         title.setStyleSheet("""
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
             color: #2c3e50;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         """)
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(title)
@@ -93,14 +107,15 @@ class RegisterDialog(QDialog):
             QWidget {{
                 background-color: {COLORS['background']};
                 border-radius: 10px;
-                padding: 20px;
+                padding: 15px;
             }}
         """)
         form_layout = QVBoxLayout(form_container)
-        form_layout.setSpacing(15)
+        form_layout.setSpacing(8)
 
         # Username
         username_label = QLabel("Tên đăng nhập:")
+        username_label.setStyleSheet("margin-bottom: 2px;")
         form_layout.addWidget(username_label)
 
         self.username_input = QLineEdit()
@@ -109,6 +124,7 @@ class RegisterDialog(QDialog):
 
         # Password
         password_label = QLabel("Mật khẩu:")
+        password_label.setStyleSheet("margin-bottom: 2px;")
         form_layout.addWidget(password_label)
 
         self.password_input = QLineEdit()
@@ -118,6 +134,7 @@ class RegisterDialog(QDialog):
 
         # Email
         email_label = QLabel("Email:")
+        email_label.setStyleSheet("margin-bottom: 2px;")
         form_layout.addWidget(email_label)
 
         self.email_input = QLineEdit()
@@ -127,6 +144,7 @@ class RegisterDialog(QDialog):
 
         # Phone
         phone_label = QLabel("Số điện thoại:")
+        phone_label.setStyleSheet("margin-bottom: 2px;")
         form_layout.addWidget(phone_label)
 
         self.phone_input = QLineEdit()
@@ -137,6 +155,7 @@ class RegisterDialog(QDialog):
 
         # Role
         role_label = QLabel("Vai trò:")
+        role_label.setStyleSheet("margin-bottom: 2px;")
         form_layout.addWidget(role_label)
 
         self.role_combo = QComboBox()

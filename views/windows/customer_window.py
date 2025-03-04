@@ -2,7 +2,7 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (QHBoxLayout, QLabel, QMainWindow, QMessageBox,
                              QPushButton, QStackedWidget, QVBoxLayout, QWidget)
 
-from views.managers.order_manager import OrderManager
+from views.managers.customer_order_manager import CustomerOrderManager
 
 
 class CustomerWindow(QMainWindow):
@@ -51,7 +51,7 @@ class CustomerWindow(QMainWindow):
         layout.addLayout(content_layout)
 
         # Thêm các trang quản lý
-        self.order_manager = OrderManager(self.user_id)
+        self.order_manager = CustomerOrderManager(self.user_id)
 
         self.stacked_widget.addWidget(self.order_manager)
 
