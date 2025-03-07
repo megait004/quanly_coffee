@@ -117,9 +117,9 @@ class OrderManager(QWidget):
         if conn is not None:
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT m.id, m.name, m.price
+                SELECT m.id, m.name, m.price, m.status
                 FROM menu_items m
-                WHERE m.available = 1
+                WHERE m.status = 'available'
                 ORDER BY m.name
             """)
             products = cursor.fetchall()
