@@ -49,27 +49,62 @@ File exe sẽ được tạo trong thư mục `dist/QuanLyCoffee`.
 ```
 quanly_coffee/
 │
-├── config/               # Cấu hình và kết nối database
-├── models/              # Các model xử lý dữ liệu
-├── views/               # Giao diện người dùng
-│   ├── windows/        # Các cửa sổ chính
-│   ├── dialogs/        # Các dialog
-│   └── managers/       # Các module quản lý
-├── controllers/         # Xử lý logic
-├── utils/              # Tiện ích
-└── static/             # Tài nguyên tĩnh khác
+├── config/               # Thư mục cấu hình
+│   └── database.py      # Cấu hình và kết nối database
+│
+├── controllers/         # Thư mục xử lý logic
+│
+├── models/             # Thư mục chứa các model
+│
+├── views/              # Thư mục giao diện người dùng
+│   ├── windows/       # Các cửa sổ chính
+│   │   ├── admin_window.py    # Giao diện admin
+│   │   └── staff_window.py    # Giao diện nhân viên
+│   │
+│   ├── dialogs/       # Các dialog
+│   │   └── login_dialog.py    # Dialog đăng nhập
+│   │
+│   └── managers/      # Các module quản lý
+│       ├── customer_order_manager.py  # Quản lý đơn hàng khách
+│       ├── inventory_manager.py       # Quản lý kho
+│       ├── menu_manager.py           # Quản lý menu
+│       ├── order_manager.py          # Quản lý đơn hàng
+│       ├── report_manager.py         # Quản lý báo cáo
+│       └── table_manager.py          # Quản lý bàn
+│
+├── utils/              # Thư mục tiện ích
+│   └── csv_importer.py  # Import dữ liệu từ CSV
+│
+├── static/             # Thư mục tài nguyên tĩnh
+│   └── images/         # Hình ảnh
+│
+├── sample_data/        # Thư mục dữ liệu mẫu
+│   ├── categories.csv
+│   ├── inventory.csv
+│   ├── menu_items.csv
+│   ├── tables.csv
+│   └── users.csv
+│
+├── main.py            # File chạy chính
+├── build.py           # Script build ứng dụng
+├── import_sample_data.py  # Script import dữ liệu mẫu
+├── product_manager.py  # Quản lý sản phẩm
+├── reset_db.py        # Script reset database
+├── statistics_manager.py  # Quản lý thống kê
+├── requirements.txt    # Các thư viện cần thiết
+└── quanly_coffee.spec # File cấu hình PyInstaller
 ```
 
 ## Cấu trúc Database
 
-### Bảng Users (Người dùng)
-- `id`: INTEGER PRIMARY KEY AUTOINCREMENT
-- `username`: TEXT UNIQUE NOT NULL - Tên đăng nhập
-- `password`: TEXT NOT NULL - Mật khẩu (đã mã hóa)
-- `role`: TEXT NOT NULL - Vai trò (admin/staff/customer)
-- `email`: TEXT UNIQUE - Email
-- `phone`: TEXT - Số điện thoại
-- `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP - Thời gian tạo
+   ### Bảng Users (Người dùng)
+   - `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+   - `username`: TEXT UNIQUE NOT NULL - Tên đăng nhập
+   - `password`: TEXT NOT NULL - Mật khẩu (đã mã hóa)
+   - `role`: TEXT NOT NULL - Vai trò (admin/staff/customer)
+   - `email`: TEXT UNIQUE - Email
+   - `phone`: TEXT - Số điện thoại
+   - `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP - Thời gian tạo
 
 ### Bảng Categories (Danh mục)
 - `id`: INTEGER PRIMARY KEY AUTOINCREMENT
