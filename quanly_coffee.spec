@@ -13,7 +13,6 @@ a = Analysis(
     datas=[
         (os.path.join(project_root, 'static'), 'static'),
         (os.path.join(project_root, 'config'), 'config'),
-        (os.path.join(project_root, 'config', 'database.db'), 'config'),
         (os.path.join(project_root, 'sample_data'), 'sample_data'),
         (os.path.join(project_root, 'utils'), 'utils'),
         (os.path.join(project_root, 'views'), 'views'),
