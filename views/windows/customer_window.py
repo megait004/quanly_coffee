@@ -3,6 +3,7 @@ from PyQt6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QMainWindow,
                              QMessageBox, QPushButton, QStackedWidget,
                              QVBoxLayout, QWidget)
 
+from views.ai_assistant_view import AIAssistantView
 from views.managers.customer_order_manager import CustomerOrderManager
 
 
@@ -122,9 +123,14 @@ class CustomerWindow(QMainWindow):
         self.order_manager = CustomerOrderManager(self.user_id)
         self.stacked_widget.addWidget(self.order_manager)
 
+        # Thêm AI Assistant vào stacked widget
+        self.ai_assistant = AIAssistantView()
+        self.stacked_widget.addWidget(self.ai_assistant)
+
     def create_menu_buttons(self, layout):
         buttons = [
-            ("Đặt món", "🍽️", lambda: self.change_page(self.order_manager))
+            ("Đặt món", "🍽️", lambda: self.change_page(self.order_manager)),
+            ("AI Hỗ trợ", "🤖", lambda: self.change_page(self.ai_assistant))
         ]
 
         for text, icon, slot in buttons:

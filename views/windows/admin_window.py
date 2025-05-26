@@ -3,6 +3,7 @@ from PyQt6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QMainWindow,
                              QMessageBox, QPushButton, QStackedWidget,
                              QVBoxLayout, QWidget)
 
+from views.ai_assistant_view import AIAssistantView
 from views.managers.employee_manager import EmployeeManager
 from views.managers.inventory_manager import InventoryManager
 from views.managers.menu_manager import MenuManager
@@ -127,6 +128,10 @@ class AdminWindow(QMainWindow):
         self.inventory_manager = InventoryManager()
         self.report_manager = ReportManager()
 
+        # Thêm AI Assistant vào stacked widget
+        self.ai_assistant = AIAssistantView()
+        self.stacked_widget.addWidget(self.ai_assistant)
+
         self.stacked_widget.addWidget(self.employee_manager)
         self.stacked_widget.addWidget(self.menu_manager)
         self.stacked_widget.addWidget(self.inventory_manager)
@@ -134,10 +139,11 @@ class AdminWindow(QMainWindow):
 
     def create_menu_buttons(self, layout):
         buttons = [
-            ("Quản lý Nhân viên", "👥", lambda: self.change_page(self.employee_manager)),
-            ("Quản lý Menu", "🍽️", lambda: self.change_page(self.menu_manager)),
-            ("Quản lý Kho", "📦", lambda: self.change_page(self.inventory_manager)),
-            ("Báo cáo & Thống kê", "📊", lambda: self.change_page(self.report_manager))
+            ("Quản lý nhân viên", "👥", lambda: self.change_page(self.employee_manager)),
+            ("Quản lý kho", "📦", lambda: self.change_page(self.inventory_manager)),
+            ("Quản lý menu", "🍽️", lambda: self.change_page(self.menu_manager)),
+            ("Báo cáo", "📊", lambda: self.change_page(self.report_manager)),
+            ("AI Hỗ trợ", "🤖", lambda: self.change_page(self.ai_assistant))
         ]
 
         for text, icon, slot in buttons:
@@ -146,7 +152,7 @@ class AdminWindow(QMainWindow):
             button.setStyleSheet("""
                 QPushButton {
                     background-color: transparent;
-                    color: #424242;
+                    color: #96aab9;
                     border: none;
                     border-radius: 8px;
                     padding: 10px;
@@ -156,12 +162,12 @@ class AdminWindow(QMainWindow):
                     font-family: 'Segoe UI', Arial;
                 }
                 QPushButton:hover {
-                    background-color: #f5f5f5;
-                    color: #1565c0;
+                    background-color: #1e2a3d;
+                    color: white;
                 }
                 QPushButton[active="true"] {
-                    background-color: #e3f2fd;
-                    color: #1565c0;
+                    background-color: #1e2a3d;
+                    color: white;
                     font-weight: bold;
                 }
             """)

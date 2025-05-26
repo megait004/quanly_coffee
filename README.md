@@ -1,6 +1,6 @@
 # Quản lý Quán Cà Phê
 
-Ứng dụng quản lý quán cà phê được xây dựng bằng Python và PyQt6.
+Ứng dụng quản lý quán cà phê thông minh được xây dựng bằng Python và PyQt6, tích hợp trí tuệ nhân tạo để nâng cao trải nghiệm người dùng.
 
 ## Cài đặt
 
@@ -59,7 +59,9 @@ quanly_coffee/
 ├── views/              # Thư mục giao diện người dùng
 │   ├── windows/       # Các cửa sổ chính
 │   │   ├── admin_window.py    # Giao diện admin
-│   │   └── staff_window.py    # Giao diện nhân viên
+│   │   ├── customer_window.py    # Giao diện khách hàng
+│   │   ├── staff_window.py    # Giao diện nhân viên
+│   │   └── ai_assistant_view.py  # Giao diện trợ lý ảo
 │   │
 │   ├── dialogs/       # Các dialog
 │   │   └── login_dialog.py    # Dialog đăng nhập
@@ -73,7 +75,10 @@ quanly_coffee/
 │       └── table_manager.py          # Quản lý bàn
 │
 ├── utils/              # Thư mục tiện ích
-│   └── csv_importer.py  # Import dữ liệu từ CSV
+│   ├── csv_importer.py  # Import dữ liệu từ CSV
+   │   ├── ai_assistant.py  # Module trợ lý ảo
+   │   └── validation.py  # Module kiểm tra dữ liệu
+   │   └── styles.py  # Module chứa các style cho giao diện
 │
 ├── static/             # Thư mục tài nguyên tĩnh
 │   └── images/         # Hình ảnh
@@ -203,31 +208,49 @@ quanly_coffee/
 
 ## Chức năng chính
 
-1. Quản lý người dùng:
+1. Trợ lý ảo thông minh:
+   - Chatbot hỗ trợ khách hàng 24/7(Hugging Face)
+   - Trả lời câu hỏi tự động
+   - Hướng dẫn sử dụng ứng dụng
+   - Giải đáp thắc mắc về menu và đơn hàng
+
+2. Hệ thống gợi ý thông minh:
+   - Gợi ý món dựa trên lịch sử đặt hàng
+   - Đề xuất combo phù hợp
+   - Gợi ý món theo thời gian và thời tiết
+   - Cá nhân hóa trải nghiệm cho từng khách hàng
+
+3. Phân tích dữ liệu nâng cao:
+   - Dự đoán nhu cầu khách hàng
+   - Phân tích xu hướng tiêu dùng
+   - Tối ưu hóa kho và nguyên liệu
+   - Báo cáo thông minh với biểu đồ trực quan
+
+4. Quản lý người dùng:
    - Đăng nhập/Đăng ký
    - Phân quyền (Admin/Staff/Customer)
 
-2. Quản lý menu:
+5. Quản lý menu:
    - Thêm/sửa/xóa món
    - Quản lý danh mục
    - Cập nhật trạng thái món
 
-3. Quản lý bàn:
+6. Quản lý bàn:
    - Thêm/xóa bàn
    - Cập nhật trạng thái bàn
    - Quản lý đặt bàn
 
-4. Quản lý đơn hàng:
+7. Quản lý đơn hàng:
    - Tạo đơn hàng mới
    - Theo dõi trạng thái đơn hàng
    - Xem lịch sử đơn hàng
 
-5. Quản lý kho:
+8. Quản lý kho:
    - Thêm/xóa sản phẩm
    - Cập nhật số lượng
    - Cảnh báo hết hàng
 
-6. Báo cáo thống kê:
+9. Báo cáo thống kê:
    - Doanh thu theo thời gian
    - Thống kê theo danh mục/món
    - Phân tích xu hướng
